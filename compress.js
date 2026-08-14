@@ -264,7 +264,20 @@ export function compress (input, alphabet) {
         huffmanNumber = huffmanEncode(huffmanNumber, pathEncode["%"]);
         i -= 2;
       } else {
-        huffmanNumber = huffmanEncode(huffmanNumber, pathEncode[segment.value[i]]);
+        if (segment.value[i] === "~") {
+          /**
+           * HACK HACK HACK!!!
+           * Our Huffman tree is missing the tilde character (whoops!)
+           * It's too late to change it now without bumping the version
+           * number, and that currently costs 1 bit. Tildes are so rare
+           * that it makes more sense to %-encode them instead.
+           */
+          huffmanNumber *= 256n;
+          huffmanNumber += BigInt(126);
+          huffmanNumber = huffmanEncode(huffmanNumber, pathEncode["%"]);
+        } else {
+          huffmanNumber = huffmanEncode(huffmanNumber, pathEncode[segment.value[i]]);
+        }
       }
     }
     // Encode segment variant as 0
@@ -301,7 +314,7 @@ export function compress (input, alphabet) {
   // Encode either SLD + subdomain or full hostname
   if (!knownSLD) {
     // Write stopping token only if path follows
-    if (path || search) number = huffmanEncode(number, domainEncode["END"]);
+    if (pathSegments.length > 0) number = huffmanEncode(number, domainEncode["END"]);
     for (let i = hostname.length - 1; i >= 0; i --) {
       number = huffmanEncode(number, domainEncode[hostname[i]]);
     }
@@ -309,7 +322,7 @@ export function compress (input, alphabet) {
     // Encode subdomain
     if (subdomain) {
       // Write stopping token only if path follows
-      if (path || search) number = huffmanEncode(number, domainEncode["END"]);
+      if (pathSegments.length > 0) number = huffmanEncode(number, domainEncode["END"]);
       for (let i = subdomain.length - 1; i >= 0; i--) {
         number = huffmanEncode(number, domainEncode[subdomain[i]]);
       }
@@ -506,6 +519,10 @@ export function decompress (input, alphabet) {
     number >>= 1n;
   }
 
+  const pathSplitIndex = path.search(/[?#]/);
+  const pathBeforeQuery = pathSplitIndex === -1 ? path : path.slice(0, pathSplitIndex);
+  const pathFromQuery = pathSplitIndex === -1 ? "" : path.slice(pathSplitIndex);
+
   let output = ""
     + (isHTTPS ? "https://" : "http://")
     + (hasWWW ? "www." : "")
@@ -513,8 +530,9 @@ export function decompress (input, alphabet) {
     + domain
     + (tld ? "." + tld : "")
     + (hasPort ? ":" + port : "")
-    + path
-    + indexSuffix;
+    + pathBeforeQuery
+    + indexSuffix
+    + pathFromQuery;
 
   return output;
 }
