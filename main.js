@@ -162,3 +162,12 @@ inputLinkElement.addEventListener("input", updateOutput);
   document.querySelector("#content").style.pointerEvents = "auto";
 
 })();
+
+// Fill the API examples in the docs section with the serving domain, so
+// self-hosted instances show their own host instead of ha.mr.
+for (const element of document.querySelectorAll("#api-docs .example-origin")) {
+  element.textContent = `${siteProtocol}//${siteDomain}`;
+}
+for (const element of document.querySelectorAll("#api-docs .example-domain")) {
+  element.textContent = siteDomain;
+}

@@ -218,8 +218,8 @@
       </p>
 
       <h3>Compress a link</h3>
-      <pre><code>curl -G https://ha.mr/api/compress --data-urlencode "url=https://example.com/some/long/path"
-# → https://ha.mr#&lt;payload&gt;</code></pre>
+      <pre><code>curl -G <span class="example-origin">https://ha.mr</span>/api/compress --data-urlencode "url=https://example.com/some/long/path"
+# → <span class="example-origin">https://ha.mr</span>#&lt;payload&gt;</code></pre>
 
       <h3>Parameters</h3>
       <table>
@@ -234,9 +234,9 @@
       </table>
 
       <h3>JSON output</h3>
-      <pre><code>curl -G https://ha.mr/api/compress --data-urlencode "url=https://example.com" \
+      <pre><code>curl -G <span class="example-origin">https://ha.mr</span>/api/compress --data-urlencode "url=https://example.com" \
   -H "Accept: application/json"</code></pre>
-      <pre><code>{ "input": "https://example.com", "output": "https://ha.mr#~Uk6", "alphabet": "ascii", "domain": "ha.mr" }</code></pre>
+      <pre><code>{ "input": "https://example.com", "output": "<span class="example-origin">https://ha.mr</span>#~Uk6", "alphabet": "ascii", "domain": "<span class="example-domain">ha.mr</span>" }</code></pre>
 
       <p>
         POST works too (form or JSON body) for links with awkward characters.
