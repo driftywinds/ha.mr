@@ -16,7 +16,7 @@
  *   # or put HAMR_DOMAIN=example.com in a .env file, then: node build.js
  */
 
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -70,6 +70,14 @@ for (const file of [
   "LICENSE"
 ]) {
   copyFileSync(join(root, file), join(outDir, file));
+}
+
+// Pages Functions — the API lives in functions/ at the repo root, which is
+// where the Git integration picks it up. Copy it into dist/functions as well
+// so `wrangler pages deploy dist` and `wrangler pages dev dist` also work.
+const functionsDir = join(root, "functions");
+if (existsSync(functionsDir)) {
+  cpSync(functionsDir, join(outDir, "functions"), { recursive: true });
 }
 
 // Regenerate config.js with the domain pinned in

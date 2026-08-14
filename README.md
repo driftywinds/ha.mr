@@ -1,5 +1,5 @@
 # ha.mr
-Compresses links and optimizes QR codes entirely in the browser, without a back-end database.
+Compresses links and optimizes QR codes in the browser — no back-end database. (The same compression is also exposed as a public API; see below.)
 
 ## How
 1. Common parts of the link (e.g. protocol, `www.` prefix, `index.html`) are manually detected and reduced to individual bits. If present, the port is encoded as a raw numeric value.
@@ -55,13 +55,72 @@ out of the box. Setup:
 5. Deploy. The site works on your `*.pages.dev` URL and any custom domain
    you attach, since links use the serving domain by default.
 
-Alternative without Git: `npm run build && npx wrangler pages deploy dist --project-name=hamr`.
+The API (see below) is deployed automatically: Pages Functions are read
+from the `functions/` directory at the repo root, so no extra configuration
+is needed. The build also copies `functions/` into `dist/functions`, so the
+no-Git alternative keeps working too:
+
+```bash
+npm run build && npx wrangler pages deploy dist --project-name=hamr
+```
 
 ## CLI
 `node standalone.js <link> [ascii|qr|emoji]` compresses a link, and
 decompresses an existing `<domain>#<payload>` or `<domain>/<payload>` link
 back to the original. Uses the `HAMR_DOMAIN` environment variable
 (default `ha.mr`).
+
+## API
+
+The site doubles as a public API: a Cloudflare Pages Function on the same
+domain runs the exact same compression code as the web UI, so output is
+identical. No key or signup required.
+
+Compress a link from the command line:
+
+```bash
+curl -G https://ha.mr/api/compress --data-urlencode "url=https://example.com/some/long/path"
+# → https://ha.mr#<payload>
+```
+
+Request parameters (query string, or form/JSON fields for POST):
+
+| Parameter  | Values                   | Default   |
+| ---------- | ------------------------ | --------- |
+| `url`      | the link to compress     | required  |
+| `alphabet` | `ascii`, `qr`, `emoji`   | `ascii`   |
+| `format`   | `text`, `json`           | `text`    |
+
+Responses are plain text (the compressed link) by default:
+
+```bash
+curl -G https://ha.mr/api/compress --data-urlencode "url=https://example.com" -H "Accept: application/json"
+```
+
+```json
+{
+  "input": "https://example.com",
+  "output": "https://ha.mr#~Uk6",
+  "alphabet": "ascii",
+  "domain": "ha.mr"
+}
+```
+
+Errors return a `400` with a plain-text (or JSON) message.
+
+POST is also accepted, with either a form body (`url=...`) or a JSON body
+(`{"url": "..."}`) — convenient when the link contains characters that are
+awkward to URL-encode:
+
+```bash
+curl https://ha.mr/api/compress -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com/?a=1&b=2"}'
+```
+
+Generated links point at the domain the request hit (or `HAMR_DOMAIN`, if
+set), matching how the site picks its domain at runtime. Decompression is
+not part of the API: opening a compressed link in any browser redirects to
+the original.
 
 ## Acknowledgements
 - https://www.npmjs.com/package/qrcode
