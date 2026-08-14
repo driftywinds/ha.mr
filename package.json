@@ -1,0 +1,12 @@
+{
+  "name": "hamr",
+  "version": "1.0.0",
+  "description": "Compresses links and optimizes QR codes entirely in the browser, without a back-end database.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "compress": "node standalone.js"
+  },
+  "license": "MIT"
+}

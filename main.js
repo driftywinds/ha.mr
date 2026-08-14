@@ -4,10 +4,11 @@ import {
   outputAlphabetQR,
   outputAlphabetEmoji
 } from "./alphabets.js";
+import { siteDomain, siteProtocol } from "./config.js";
 
 var settings = {
   emoji: false,
-  qr: false
+  qr: true
 };
 
 const settingsElements = {
@@ -81,14 +82,15 @@ function updateOutput () {
       outputRatioElement.textContent = "Output is the same length as the input";
       outputRatioElement.style.color = "gray";
     }
-    outputLinkElement.textContent = `http://ha.mr#${output}`;
-    outputLinkElement.href = `http://ha.mr#${output}`;
+    const link = `${siteProtocol}//${siteDomain}#${output}`;
+    outputLinkElement.textContent = link;
+    outputLinkElement.href = link;
     outputLinkElement.style.color = "";
     if (settings.qr) {
       const errorCorrection = ["L", "M", "Q", "H"][qrCodeCorrectionLevelElement.value];
       qrCodeImage.style.display = "inline";
       qrCodeCorrectionLevelContainer.style.display = "inline";
-      let qrCodeLink = `HTTP://HA.MR/${compress(input, outputAlphabetQR)}`;
+      let qrCodeLink = `${siteProtocol.toUpperCase()}//${siteDomain.toUpperCase()}/${compress(input, outputAlphabetQR)}`;
       QRCode.toDataURL(qrCodeLink, {
         errorCorrectionLevel: errorCorrection,
         scale: 8

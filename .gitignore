@@ -1,0 +1,8 @@
+# Local configuration / secrets
+.env
+
+# Build output
+dist/
+
+# Node
+node_modules/
