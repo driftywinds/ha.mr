@@ -246,6 +246,26 @@
       </p>
     </section>
 
+    <script>
+      // Show the serving domain in the API examples, so self-hosted
+      // instances see their own host instead of ha.mr. Runs inline (rather
+      // than only in main.js) so a browser with a cached main.js from an
+      // older deploy still gets correct examples.
+      (async () => {
+        try {
+          const { siteDomain, siteProtocol } = await import("./config.js");
+          const origin = siteProtocol + "//" + siteDomain;
+          document.querySelectorAll("#api-docs .example-origin").forEach(el => el.textContent = origin);
+          document.querySelectorAll("#api-docs .example-domain").forEach(el => el.textContent = siteDomain);
+        } catch (e) {
+          // Fall back to the literal serving host if config.js can't be loaded.
+          const origin = window.location.protocol + "//" + window.location.host;
+          document.querySelectorAll("#api-docs .example-origin").forEach(el => el.textContent = origin);
+          document.querySelectorAll("#api-docs .example-domain").forEach(el => el.textContent = window.location.host);
+        }
+      })();
+    </script>
+
   </div>
 
   <script type="module" src="main.js"></script>
