@@ -4,5 +4,8 @@
 # Build output
 dist/
 
+# Wrangler local dev state
+.wrangler/
+
 # Node
 node_modules/
